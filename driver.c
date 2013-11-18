@@ -1,3 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "assembler.h"
+
+int main ( int argc, char *argv[] )
+{
+	if(argv[1] == NULL || argv[2] == NULL){
+		printf("Input and output file name arguments necessary.\n");
+		exit(1);
+		if(argv[3] == NULL)
+			run(argv[1], argv[2]);
+	}
+
+	else if(strcmp(argv[1], "-symbols") == 0){
+		if(argv[2] == NULL || argv[3] == NULL){
+			printf("Input and output file name arguments necessary after '-symbols' tag.\n");
+			exit(1);
+		}
+		else{
+			run_symbol(argv[2], argv[3]);
+		}
+	}
+
+	else if(strcmp(argv[1], "-list") == 0){
+		if(argv[2] == NULL || argv[3] == NULL){
+			printf("Input and output file name arguments necessary after '-list' tag.\n");
+			exit(1);
+		}
+		else{
+			run_list(argv[2], argv[3]);
+		}
+	}
+	else{
+		printf("Please check your arguments. Must be in one of the following forms:\n");
+		printf("	assemble <input file> <output file>\n");
+		printf("	assemble -symbols <input file> <output file>\n");
+		printf("	assemble -list <input file> <output file>\n");
+		exit(1);
+	}
+
+	return 0;
+}
+
 // On my honor:
 //
 // - I have not discussed the Java language code in my program with
@@ -19,20 +64,3 @@
 // aid on this assignment.
 //
 // Marcus Tedesco
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "assembler.h"
-
-int main ( int argc, char *argv[] )
-{
-	if(argv[1] == NULL || argv[2] == NULL){
-		printf("Input and output file name arguments necessary.\n");
-		exit(1);
-	}
-
-	printf("Hello I'm the MIPS Assembler\n");
-	
-	run(argv[1], argv[2]);
-}
