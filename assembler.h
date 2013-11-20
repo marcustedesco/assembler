@@ -2,17 +2,29 @@
 #define ASSEMBLER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
-typedef struct{
-	char name[128];
-	int index;
-	//0 if in text array, 1 if in data array
-	int TorD;
-} Symbol;
+enum Type {ADD, SUB};
+
+struct Instruc {
+	enum Type type;
+	char* command;
+}; 
+
+int32_t reg[32];
 
 void run (char * inputFile, char * outFile);
 void run_symbol (char * inputFile, char * outFile);
 void run_list (char * inputFile, char * outFile);
+char * stripExtra(char * inputFile);
+void printFile(char * filename);
+int instrucCountAndFile(char * filename);
+int isInstruc(char * line);
+void fillInstruc(struct Instruc *list);
+char * getInstrucBinary(char * line);
+int getRegNum(char* reg);
+char * intToBinChar(int num, int length);
 /*char* cleanStr(char line[]);
 char * removeComment(char line[]);
 int getRegNum(char reg[]);

@@ -9,10 +9,7 @@ int main ( int argc, char *argv[] )
 	if(argv[1] == NULL || argv[2] == NULL){
 		printf("Input and output file name arguments necessary.\n");
 		exit(1);
-		if(argv[3] == NULL)
-			run(argv[1], argv[2]);
 	}
-
 	else if(strcmp(argv[1], "-symbols") == 0){
 		if(argv[2] == NULL || argv[3] == NULL){
 			printf("Input and output file name arguments necessary after '-symbols' tag.\n");
@@ -32,6 +29,8 @@ int main ( int argc, char *argv[] )
 			run_list(argv[2], argv[3]);
 		}
 	}
+	else if(argv[1] != NULL && argv[2] != NULL && argv[3] == NULL)
+		run(argv[1], argv[2]);
 	else{
 		printf("Please check your arguments. Must be in one of the following forms:\n");
 		printf("	assemble <input file> <output file>\n");
