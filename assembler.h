@@ -12,6 +12,8 @@ struct Instruc {
 	char* command;
 }; 
 
+//struct Instruc * myInstruc; 
+
 int32_t reg[32];
 
 void run (char * inputFile, char * outFile);
@@ -23,7 +25,7 @@ char * removeComment(char * line);
 void printFile(char * filename);
 int instrucCountAndFile(char * filename);
 int isInstruc(char * line);
-void fillInstruc(struct Instruc *list);
+void fillInstrucList(struct Instruc list[]);//struct Instruc *list);
 char * getInstrucBinary(char * line);
 char * execInstruc(char * line);
 int getRegNum(char* reg);

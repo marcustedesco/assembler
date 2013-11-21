@@ -34,18 +34,27 @@ void run(char * inputFile, char * outFile)
 	#endif
 
 	//Instruc * myInstruc[numInstruc];
+	//myInstruc = malloc(sizeof(struct Instruc)*numInstruc);
 
-	struct Instruc myInstruc[numInstruc];
-	myInstruc[0].command = "helppppp";
-	myInstruc[0].type = ADD;
+
+	//struct Instruc myInstruc[numInstruc];
+	//myInstruc[0].command = "helppppp";
+	//myInstruc[0].type = ADD;
 	
-	if(myInstruc[0].type == ADD){
+	//if(myInstruc[0].type == ADD){
 		//printf("THE type is the same!\n");
-	}
+	//}
 	
 	//myInstruc = malloc(sizeof(Instruc)*numInstruc);
 
-	//fillInstruc(myInstruc[0]);
+	struct Instruc myInstruc[numInstruc];
+
+	fillInstrucList(myInstruc);
+
+	int i;
+	for(i = 0; i < sizeof(myInstruc)/sizeof(struct Instruc); i++){
+		printf("myInstruc[%d]: %s\n", i, myInstruc[i].command);
+	}
 
 	//after all data fields have been intialized
 	//call function to loop through the intermediate file
@@ -201,26 +210,14 @@ int instrucCountAndFile(char * filename){
 	}
 
 	FILE *ofp;
-	char * intermediate = "instructions2.txt";
+	char * intermediate = "instructions.txt";
 
-	ofp = fopen(intermediate, "wb");
+	ofp = fopen(intermediate, "w+");
 
 	if (ofp == NULL) {
 	  fprintf(stderr, "Can't open output file %s!\n", intermediate);
 	  exit(1);
 	}
-
-
-	//why is this not working!
-	/*FILE *ofp;
-	char * outFile = "instructions.txt";
-
-	ofp = fopen(outFile, "wb");
-
-	if (ofp == NULL) {
-	  fprintf(stderr, "Can't open output file %s!\n", outFile);
-	  exit(1);
-	}*/
 
 	char line[256];
 	int count = 0;
@@ -244,9 +241,11 @@ int instrucCountAndFile(char * filename){
 	  		inText = 1;
 	    if(inText == 0 && isInstruc(line) == 0){
 	    	//isInstruc takes a pointer so the value is change on return
+	    	fprintf(ofp, "%s\n", lineCopy);
 	    	binary = getInstrucBinary(lineCopy);
 	    	printf("binary %s: 			%s\n", lineCopy, binary);
-	    	fprintf(ofp, "%s\n", binary);
+	    	//fprintf(ofp, "%s\n", binary);
+
 	    	count++;
 	    }
 	  }
@@ -254,6 +253,7 @@ int instrucCountAndFile(char * filename){
 
 	fclose(ifp);
 	fclose(ofp);
+	//fclose(ofp2);
 
 	return count;
 }
@@ -362,8 +362,15 @@ int isInstruc(char * line){
 }
 
 void fillInstrucList(struct Instruc *list){
+	#ifdef debug
+		printf("--In fillInstrucList--\n");
+	#endif
+
+	//list[0].command = malloc(sizeof(char)*256);
+	//list[0].command = "FIRST COMMAND";	
+
 	FILE *ifp;
-	char* filename = "textInstructions.txt";
+	char* filename = "instructions.txt";
 	ifp = fopen(filename,"r");
 
 	if (ifp == NULL) {
@@ -376,16 +383,34 @@ void fillInstrucList(struct Instruc *list){
 
 	while (!feof(ifp)) {
 	  if (fgets (line, 256, ifp)!=NULL){
-	  	  char * piece = strtok(line, " ");
+
+	  	char * lineCopy = malloc(strlen(line)+1);
+	    strcpy(lineCopy, line);
+	    
+	  	if(strstr(line,".text") != NULL)
+	  		inText = 0;
+	  	if(strstr(line,".data") != NULL)
+	  		inText = 1;
+	    if(inText == 0 && isInstruc(line) == 0){
+	    	//isInstruc takes a pointer so the value is change on return
+	    	fprintf(ofp, "%s\n", lineCopy);
+	    	binary = getInstrucBinary(lineCopy);
+	    	printf("binary %s: 			%s\n", lineCopy, binary);
+	    	//fprintf(ofp, "%s\n", binary);
+
+	    	count++;
+	    }
+	  	  /*char * piece = strtok(line, " ");
 		  if(piece != NULL){
-			printf ("%s\n",piece);
+			//printf ("%s\n",piece);
+			printf("index is: %d\n", index);
 			if(strcmp(piece,"lw") == 0){
-				//list[index]->command = malloc(sizeof(char)*256);
-				//list[index]->command = line;	
+				list[index].command = malloc(sizeof(char)*256);
+				list[index].command = line;	
 			}
-		  }
+			index++;
+		  }*/
 	  }
-	  index++;
 	}
 	return;
 }
