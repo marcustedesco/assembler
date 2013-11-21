@@ -746,7 +746,6 @@ char* cleanStr(char line[]){
 	pch = strtok (line, delims);
 	while (pch != NULL)
 	{
-	    //printf ("~~~~~~~~~%s\n",pch);
 	    strcat(result,pch);
 	    strcat(result,"~");
 	    pch = strtok (NULL, delims);

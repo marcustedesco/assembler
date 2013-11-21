@@ -7,7 +7,7 @@
 #include "assembler.h"
 
 #define debug
-#define displayI
+//#define displayI
 
 void run(char * inputFile, char * outFile)
 {
@@ -47,15 +47,6 @@ void run(char * inputFile, char * outFile)
 
 	//fillInstruc(myInstruc[0]);
 
-	//after all data fields have been intialized
-	//call function to loop through the intermediate file
-	//and call execInstruc execInstruc(char * line)
-	//should return and int instead of char *
-	//should return the next line to go to.
-	//so maybe the instructions should be in the array first
-	//with the labels in struct to look up their location
-	//data fields will be field and have another struct to 
-	//tell their location if necessary
 }
 
 void run_symbol (char * inputFile, char * outFile){
@@ -389,7 +380,7 @@ void fillInstrucList(struct Instruc *list){
 	}
 	return;
 }
-//COPY THIS TO Execute INSTRUCTIONS 
+
 char * getInstrucBinary(char * line){
 	#ifdef debug
 		//printf("--In getInstrucBinary--\n");
@@ -489,23 +480,22 @@ char * getInstrucBinary(char * line){
 	}
 	else if(strcmp(one,"addi") == 0){
 		strcpy(binary,"001000");
-		//rs
-		strcat(binary,intToBinChar(getRegNum(three),5));
 		//rt
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		strcat(binary,intToBinChar(atoi(four),16));
+		//rt
+		strcat(binary,intToBinChar(getRegNum(three),5));
+		strcat(binary,"immediatexxxxxxx");
 		#ifdef displayI
 			strcat(binary,"\taddi");
 		#endif
 	}
 	else if(strcmp(one,"addiu") == 0){
 		strcpy(binary,"001001");
-		//rs
-		strcat(binary,intToBinChar(getRegNum(three),5));
 		//rt
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		//change this so it has to be unsigned
-		strcat(binary,intToBinChar(atoi(four),16));
+		//rt
+		strcat(binary,intToBinChar(getRegNum(three),5));
+		strcat(binary,"immediatexxxxxxx");
 		#ifdef displayI
 			strcat(binary,"\taddiu");
 		#endif
@@ -545,7 +535,7 @@ char * getInstrucBinary(char * line){
 		strcat(binary,intToBinChar(getRegNum(three),5));
 		//rd
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		strcat(binary,intToBinChar(atoi(four),16));
+		strcat(binary,"immediatexxxxxxx");
 		#ifdef displayI
 			strcat(binary,"\tori");
 		#endif
@@ -557,7 +547,7 @@ char * getInstrucBinary(char * line){
 		strcat(binary,intToBinChar(getRegNum(three),5));
 		//rd
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		strcat(binary,intToBinChar(atoi(four),16));
+		strcat(binary,"immediatexxxxxxx");
 		#ifdef displayI
 			strcat(binary,"\tandi");
 		#endif
@@ -583,7 +573,7 @@ char * getInstrucBinary(char * line){
 		strcat(binary,intToBinChar(getRegNum(three),5));
 		//rd
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		strcat(binary,intToBinChar(atoi(four),16));
+		strcat(binary,"immediatexxxxxxx");
 		#ifdef displayI
 			strcat(binary,"\tslti");
 		#endif
@@ -731,10 +721,6 @@ char * getInstrucBinary(char * line){
 
 	char * bin = &binary[0];
 	return strdup(bin);
-}
-
-char * execInstruc(char * line){
-	return "execute";
 }
 
 int getRegNum(char* reg){
