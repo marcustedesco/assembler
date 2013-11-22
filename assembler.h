@@ -12,9 +12,16 @@ struct Instruc {
 	char* command;
 }; 
 
+struct DataBinaryLine {
+	char line[32];
+};
+
 //struct Instruc * myInstruc; 
 
 int32_t reg[32];
+
+//this is a test
+void convertBaseVersion(char input, int base, char *output, int digits);
 
 void run (char * inputFile, char * outFile);
 void run_symbol (char * inputFile, char * outFile);
@@ -27,15 +34,8 @@ int instrucCountAndFile(char * filename);
 int isInstruc(char * line);
 void fillInstrucList(struct Instruc list[]);//struct Instruc *list);
 char * getInstrucBinary(char * line);
-char * execInstruc(char * line);
+int execInstruc(char * line, int current);
 int getRegNum(char* reg);
 char * intToBinChar(int num, int length);
-/*char* cleanStr(char line[]);
-char * removeComment(char line[]);
-int getRegNum(char reg[]);
-void executeCommands(int *reg, char commands[128][128], int usage);
-void printBinary(int *reg, char commands[128][128], int usage, char * outFile);
-char * intToBinChar(int num, int length);
-char * compareBin(char first[], char second[], int instruc);*/
 
 #endif

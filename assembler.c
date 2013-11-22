@@ -6,8 +6,8 @@
 
 #include "assembler.h"
 
-#define debug
-#define displayI
+//#define debug
+//#define displayI
 
 void run(char * inputFile, char * outFile)
 {
@@ -33,28 +33,109 @@ void run(char * inputFile, char * outFile)
 		printf("Number of instructions in .text section: %d!\n", numInstruc);
 	#endif
 
-	//Instruc * myInstruc[numInstruc];
-	//myInstruc = malloc(sizeof(struct Instruc)*numInstruc);
-
-
-	//struct Instruc myInstruc[numInstruc];
-	//myInstruc[0].command = "helppppp";
-	//myInstruc[0].type = ADD;
-	
-	//if(myInstruc[0].type == ADD){
-		//printf("THE type is the same!\n");
-	//}
-	
-	//myInstruc = malloc(sizeof(Instruc)*numInstruc);
-
 	struct Instruc myInstruc[numInstruc];
 
-	fillInstrucList(myInstruc);
+	int j;
+	for(j = 0; j < sizeof(myInstruc)/sizeof(struct Instruc); j++){
+		myInstruc[j].command = malloc(sizeof(char)*256);
+		myInstruc[j].command = "\0";	
+	}
 
+    fillInstrucList(myInstruc);
+	
 	int i;
 	for(i = 0; i < sizeof(myInstruc)/sizeof(struct Instruc); i++){
 		printf("myInstruc[%d]: %s\n", i, myInstruc[i].command);
 	}
+
+	int k;
+	for(k = 0; k < sizeof(reg)/sizeof(reg[0]); k++){
+		printf("reg[%d]: %d\n", k, reg[k]);
+	}
+
+	int current = 0;
+	while(current < sizeof(myInstruc)/sizeof(struct Instruc)){
+		current = execInstruc(myInstruc[current].command, current);
+	}
+
+	for(k = 0; k < sizeof(reg)/sizeof(reg[0]); k++){
+		printf("reg[%d]: %d\n", k, reg[k]);
+	}
+
+	FILE *ofp;
+	char * out = "ascii.txt";
+
+	ofp = fopen(out, "w+");
+
+	if (ofp == NULL) {
+	  fprintf(stderr, "Can't open output file %s!\n", out);
+	  exit(1);
+	}
+
+	char testString[] = "The sum of numbers in array is:. ";
+	char * test = malloc(sizeof(char)*8);
+	//char * temp = malloc(sizeof(char)*32);
+
+	int z;
+	int count = 0;
+	int index = 0;
+
+	//make this array the size of the number of characters in the string/4
+	//if(sizeof(testString)/sizeof(char)%4 != 0)
+	//	struct DataBinaryLine data[sizeof(testString)/sizeof(char)+1];
+	//else
+	//	struct DataBinaryLine data[sizeof(testString)/sizeof(char)];
+
+	struct DataBinaryLine data[sizeof(testString)/sizeof(char)+1];
+	for(j = 0; j < sizeof(data)/sizeof(struct DataBinaryLine)+1; j++){
+		data[j].line[0] = '\0';	
+	}
+
+	for(z = 0; z < sizeof(testString)/sizeof(char) ; z++){
+		if(count >=4){
+			//might add '\0' to this
+			fprintf(ofp, "%s\n", data[index].line);
+			index++;
+			count = 0;
+		}
+		printf("character: %c\n",testString[z]);
+		convertBaseVersion(testString[z], 2, test, 8);
+		char * temp = strcat(test,data[index].line);
+		printf("temp: %s\n",temp);
+		strcpy(data[index].line,temp);
+		printf("line: %s\n",data[index].line);
+		count++;
+/*
+		if(testString[z] != '\0'){
+			convertBaseVersion(testString[z], 2, test, 8);
+			printf("%s",test);
+			if(count == 3){
+				count = -1;
+				printf("\n");
+			}
+			count++;
+		}*/
+	}
+
+	printf("line outside: %s\n",data[index].line);
+	//char * temp2 = malloc(sizeof(char)*32);
+	char temp2[32];
+	temp2[0] = '\0';
+	printf("temp2: %s\n",temp2);
+
+	if(strlen(data[index].line) < 32)
+	{
+		int n = 32 - strlen(data[index].line);
+		for(i = 0; i < n; i++){
+			strcat(temp2,"0");
+			printf("temp2: %s\n",temp2);
+		}
+	}
+
+	strcat(temp2,data[index].line);
+	strcpy(data[index].line,temp2);
+
+	fprintf(ofp, "%s\n", data[index].line);
 
 	//after all data fields have been intialized
 	//call function to loop through the intermediate file
@@ -65,6 +146,19 @@ void run(char * inputFile, char * outFile)
 	//with the labels in struct to look up their location
 	//data fields will be field and have another struct to 
 	//tell their location if necessary
+}
+
+void convertBaseVersion(char input, int base, char *output, int digits) { 
+	int i, remainder; 
+	char digitsArray[17] = "0123456789ABCDEF";
+
+	for (i = digits; i > 0; i--) { 
+		remainder = input % base; 
+		input = input / base; 
+		output[i - 1] = digitsArray[remainder]; 
+	} 
+
+	output[digits] = '\0'; 
 }
 
 void run_symbol (char * inputFile, char * outFile){
@@ -106,7 +200,7 @@ void run_list (char * inputFile, char * outFile){
 }
 
 /* returns intermediate filename */
-char* stripExtra(char * inputFile){
+char * stripExtra(char * inputFile){
 	FILE *ifp;
 	ifp = fopen(inputFile,"r");
 
@@ -219,6 +313,16 @@ int instrucCountAndFile(char * filename){
 	  exit(1);
 	}
 
+	FILE *ofp2;
+	char * binFile = "binary.txt";
+
+	ofp2 = fopen(binFile, "w+");
+
+	if (ofp2 == NULL) {
+	  fprintf(stderr, "Can't open output file %s!\n", binFile);
+	  exit(1);
+	}
+
 	char line[256];
 	int count = 0;
 	int inText = 1;
@@ -232,7 +336,6 @@ int instrucCountAndFile(char * filename){
 	
 	while (!feof(ifp)) {
 	  if (fgets (line, 256, ifp)!=NULL){
-	  	//printf("*****************************line is: %s \n", line);
 	    char * lineCopy = malloc(strlen(line)+1);
 	    strcpy(lineCopy, line);
 	  	if(strstr(line,".text") != NULL)
@@ -241,10 +344,10 @@ int instrucCountAndFile(char * filename){
 	  		inText = 1;
 	    if(inText == 0 && isInstruc(line) == 0){
 	    	//isInstruc takes a pointer so the value is change on return
-	    	fprintf(ofp, "%s\n", lineCopy);
+	    	fprintf(ofp, "%s", lineCopy);
 	    	binary = getInstrucBinary(lineCopy);
 	    	printf("binary %s: 			%s\n", lineCopy, binary);
-	    	//fprintf(ofp, "%s\n", binary);
+	    	fprintf(ofp2, "%s\n", binary);
 
 	    	count++;
 	    }
@@ -253,7 +356,7 @@ int instrucCountAndFile(char * filename){
 
 	fclose(ifp);
 	fclose(ofp);
-	//fclose(ofp2);
+	fclose(ofp2);
 
 	return count;
 }
@@ -266,6 +369,7 @@ int instrucCountAndFile(char * filename){
 **/
 int isInstruc(char * line){
 	char * piece = strtok(line, "~\n");
+
 	if(piece != NULL){
 		//printf ("%s\n",piece);
 		if(strcmp(piece,"lw") == 0){
@@ -361,13 +465,11 @@ int isInstruc(char * line){
 	return 1;
 }
 
+//this assumes that the instructions are in their own file or just instructions
 void fillInstrucList(struct Instruc *list){
 	#ifdef debug
 		printf("--In fillInstrucList--\n");
 	#endif
-
-	//list[0].command = malloc(sizeof(char)*256);
-	//list[0].command = "FIRST COMMAND";	
 
 	FILE *ifp;
 	char* filename = "instructions.txt";
@@ -383,35 +485,13 @@ void fillInstrucList(struct Instruc *list){
 
 	while (!feof(ifp)) {
 	  if (fgets (line, 256, ifp)!=NULL){
-
-	  	char * lineCopy = malloc(strlen(line)+1);
-	    strcpy(lineCopy, line);
-	    
-	  	if(strstr(line,".text") != NULL)
-	  		inText = 0;
-	  	if(strstr(line,".data") != NULL)
-	  		inText = 1;
-	    if(inText == 0 && isInstruc(line) == 0){
-	    	//isInstruc takes a pointer so the value is change on return
-	    	fprintf(ofp, "%s\n", lineCopy);
-	    	binary = getInstrucBinary(lineCopy);
-	    	printf("binary %s: 			%s\n", lineCopy, binary);
-	    	//fprintf(ofp, "%s\n", binary);
-
-	    	count++;
+	  	if(strcmp(line,"\n") != 0){
+			list[index].command = strdup(line);	
+	    	index++;
 	    }
-	  	  /*char * piece = strtok(line, " ");
-		  if(piece != NULL){
-			//printf ("%s\n",piece);
-			printf("index is: %d\n", index);
-			if(strcmp(piece,"lw") == 0){
-				list[index].command = malloc(sizeof(char)*256);
-				list[index].command = line;	
-			}
-			index++;
-		  }*/
 	  }
 	}
+
 	return;
 }
 //COPY THIS TO Execute INSTRUCTIONS 
@@ -445,41 +525,53 @@ char * getInstrucBinary(char * line){
 		four = strtok(NULL,key);
 
 	if(strcmp(one,"lw") == 0){
-		//this is going to need to split up the base from two or three
+		char * offset = strtok(three,"()");
+		char * rs = strtok(NULL,"()");
+
 		strcpy(binary,"100011");
-		//base
-		strcat(binary,"basex");	
+		//rs
+		strcat(binary,intToBinChar(getRegNum(rs),5));	
 		//rt	
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		//offset
-		strcat(binary,"offsetxxxxxxxxxx");	
+		strcat(binary,intToBinChar(atoi(offset),16));	
 		#ifdef displayI
 			strcat(binary,"\tlw");
 		#endif
 	}
 	else if(strcmp(one,"sw") == 0){
-		//this is going to need to split up the base from two or three
+		char * offset = strtok(three,"()");
+		char * rs = strtok(NULL,"()");
+
 		strcpy(binary,"101011");
-		//base
-		strcat(binary,"basex");	
+		//rs
+		strcat(binary,intToBinChar(getRegNum(rs),5));	
 		//rt	
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		//offset
-		strcat(binary,"offsetxxxxxxxxxx");
+		strcat(binary,intToBinChar(atoi(offset),16));
 		#ifdef displayI
 			strcat(binary,"\tsw");
 		#endif
 	}
 	else if(strcmp(one,"la") == 0){
-		//need to figure out what this one does exactly
-		strcpy(binary,"laxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		strcpy(binary,"001000");
+		//$zero
+		strcat(binary,intToBinChar(getRegNum("$zero"),5));
+		//rd
+		strcat(binary,intToBinChar(getRegNum(two),5));
+		strcat(binary,"labelxxxxxxxxxxx");//intToBinChar(atoi(four),16));
 		#ifdef displayI
 			strcat(binary,"\tla");
 		#endif
 	}
 	else if(strcmp(one,"li") == 0){
-		//need to figure out what this one does exactly
-		strcpy(binary,"lixxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		strcpy(binary,"001001");
+		//$zero
+		strcat(binary,intToBinChar(getRegNum("$zero"),5));
+		//rd
+		strcat(binary,intToBinChar(getRegNum(two),5));
+		strcat(binary,intToBinChar(atoi(four),16));
 		#ifdef displayI
 			strcat(binary,"\tli");
 		#endif
@@ -758,8 +850,167 @@ char * getInstrucBinary(char * line){
 	return strdup(bin);
 }
 
-char * execInstruc(char * line){
-	return "execute";
+/*
+ * Executes the instructions and stores the proper values in the registers
+ * Returns: index of the next instruction 
+ */
+int execInstruc(char * line, int current){
+	#ifdef debug
+		printf("--In execInstruc--\n");
+		printf("	instruc to execute: %s!\n", line);
+	#endif
+
+	char key[] = "~\n";
+	char * one;
+	char * two;
+	char * three;
+	char * four;
+	
+	one = strtok (line,key);
+
+	if(one != NULL)
+		two = strtok(NULL,key);
+	if(two != NULL)
+		three = strtok(NULL,key);
+	if(three != NULL)
+		four = strtok(NULL,key);
+
+	if(strcmp(one,"lw") == 0){
+		//reg[rt] = reg[reg[rs] + offset]
+		//convert the offset and rs to respective string and int
+		//reg[reg[getRegNum(RS)] + atoi(offset)] = reg[getRegNum(two)];
+	}
+	else if(strcmp(one,"sw") == 0){
+		//reg[reg[rs] + offset] = reg[rt]
+		//convert the offset and rs to respective string and int
+		//reg[getRegNum(two)] = reg[reg[getRegNum(RS)] + atoi(offset)];
+	}
+	else if(strcmp(one,"la") == 0){
+		//executes as a pseudo instruction addi: rt = rs+label
+		//need to convert label to int value
+		//reg[getRegNum(two)] = reg[getRegNum("$zero")] + LABEL;//atoi(four);
+	}
+	else if(strcmp(one,"li") == 0){
+		//executes as a pseudo instruction addiu: rt = rs+imm16
+		reg[getRegNum(two)] = reg[getRegNum("$zero")] + atoi(four);
+	}
+	else if(strcmp(one,"add") == 0){
+		//rd = rs+rt
+		reg[getRegNum(two)] = reg[getRegNum(three)] + reg[getRegNum(four)];
+	}
+	else if(strcmp(one,"sub") == 0){
+		//rd = rs-rt
+		reg[getRegNum(two)] = reg[getRegNum(three)] + reg[getRegNum(four)];
+	}
+	else if(strcmp(one,"addi") == 0){
+		//rt = rs+imm16
+		reg[getRegNum(two)] = reg[getRegNum(three)] + atoi(four);
+	}
+	else if(strcmp(one,"addiu") == 0){
+		//rt = rs+imm16
+		reg[getRegNum(two)] = reg[getRegNum(three)] + atoi(four);
+	}
+	else if(strcmp(one,"or") == 0){
+		//rd = rs OR rt (bitwise)
+		//covert rs&rt values to binary 5? bits and then convert result to int and store in rd
+	}
+	else if(strcmp(one,"and") == 0){
+		//rd = rs AND rt (bitwise)
+		//covert rs&rt values to binary 5? bits and then convert result to int and store in rd
+	}
+	else if(strcmp(one,"ori") == 0){
+		//rd = rs OR imm16 (bitwise)
+		//intToBinChar(atoi(four),16)
+		//covert rs&imm16 values to binary 5? bits and then convert result to int and store in rd
+	}
+	else if(strcmp(one,"andi") == 0){
+		//rd = rs AND imm16 (bitwise)
+		//intToBinChar(atoi(four),16)
+		//covert rs&imm16 values to binary 5? bits and then convert result to int and store in rd
+	}
+	else if(strcmp(one,"slt") == 0){
+		//if(rs < rt) then rd = 1
+		if(reg[getRegNum(three)] < reg[getRegNum(four)]){
+			reg[getRegNum(two)] = 1;
+		}else{
+			reg[getRegNum(two)] = 0;
+		}
+	}
+	else if(strcmp(one,"slti") == 0){
+		//if(rs < imm16) then rd = 1
+		if(reg[getRegNum(three)] < atoi(four)){
+			reg[getRegNum(two)] = 1;
+		}else{
+			reg[getRegNum(two)] = 0;
+		}
+	}
+	else if(strcmp(one,"sll") == 0){
+		//value of rs is converted to 32 bit binary and shifted left by sa bits
+		//the space is filled with 0's and the resulting number is stored in rd		
+	}
+	else if(strcmp(one,"srl") == 0){
+		//value of rs is converted to 32 bit binary and shifted right by sa bits
+		//the space is filled with 0's and the resulting number is stored in rd
+	}
+	else if(strcmp(one,"sra") == 0){
+		//same as srl but the space is filled with the sign bit AKA bit 31
+		//value of rs is converted to 32 bit binary and shifted right by sa bits
+		//the space is filled with 0's and the resulting number is stored in rd
+	}
+	else if(strcmp(one,"nop") == 0){
+		//do nothing
+		//or maybe increment the count if that how i choose to do it
+	}
+	else if(strcmp(one,"beq") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"bne") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"bltz") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"blez") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"blt") == 0){
+		//flow of control
+		//this should actually never be executed if the 
+		//previous functions saved the instructions correctly
+	}
+	else if(strcmp(one,"ble") == 0){
+		//flow of control
+		//this should actually never be executed if the 
+		//previous functions saved the instructions correctly
+	}
+	else if(strcmp(one,"j") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"jr") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"jal") == 0){
+		//flow of control
+		//this return is going to change
+		return current+1;
+	}
+	else if(strcmp(one,"syscall") == 0){
+		//no clue what this is supposed to do
+	}
+
+	return current+1;
 }
 
 int getRegNum(char* reg){
