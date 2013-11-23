@@ -5,23 +5,22 @@
 #include <string.h>
 #include <stdint.h>
 
-enum Type {ADD, SUB};
-
 struct Instruc {
-	enum Type type;
-	char* command;
+	char * command;
 }; 
 
 struct DataBinaryLine {
 	char line[32];
 };
 
-//struct Instruc * myInstruc; 
+struct Label {
+	char * label;
+	//1 if a text label, 0 if a data label
+	int location;
+	int TorD;
+};
 
 int32_t reg[32];
-
-//this is a test
-void convertBaseVersion(char input, int base, char *output, int digits);
 
 void run (char * inputFile, char * outFile);
 void run_symbol (char * inputFile, char * outFile);
@@ -31,9 +30,16 @@ char * cleanStr(char * line);
 char * removeComment(char * line);
 void printFile(char * filename);
 int instrucCountAndFile(char * filename);
+int labelCount(char * filename);
+int sizeOfDataBinary(char * filename);
 int isInstruc(char * line);
+void convertAsciiToBin(char ascii, char *output, int digits);
 void fillInstrucList(struct Instruc list[]);//struct Instruc *list);
-char * getInstrucBinary(char * line);
+void fillLabelList(char * filename, struct Label list[]);
+void fillDataLines(char * filename, struct DataBinaryLine data[]);
+int getLabelIndex(char * label, struct Label list[]);
+char * getInstrucBinary(char * line, struct Label list[]);
+void binaryToFile(char * inFile, char * outFile, struct Label list[]);
 int execInstruc(char * line, int current);
 int getRegNum(char* reg);
 char * intToBinChar(int num, int length);
