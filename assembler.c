@@ -1164,9 +1164,11 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 			    		//strcat(tempo,"\0");
 			    		printf("tempo after cpy:\t%s\n", tempo);
 			    		char tempo2[4];
-			    		//tempo2[0] = '\0';
-			    		strcpy(tempo2, "\0");
-			    		strcpy(tempo2,reverseStr(tempo));
+			    		tempo2[0] = '\0';
+			    		//strcpy(tempo2, "\0");
+			    		printf("what reverse string returns: %s\n", reverseStr(tempo));
+			    		strncpy(tempo2,reverseStr(tempo),4);
+			    		tempo2[4] = '\0';
 			    		printf("tempo2 after cpy:\t%s\n", tempo2);
 			    		strcat(reverseQuote,tempo2);
 		    		}
@@ -1272,14 +1274,14 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 }
 
 char * reverseStr(char * str){
-	char temp[strlen(str)];
+	char temp[strlen(str)+1];
 	int i;
 	for(i = 0; i < strlen(str); i++){
 		temp[i] = str[strlen(str)-1-i];
 	}
 
-	//temp[i+1] = '\0';
-	strcat(temp,"\0");
+	temp[i+1] = '\0';
+	//strcat(temp,"\0");
 
 	return strdup(temp);
 }
