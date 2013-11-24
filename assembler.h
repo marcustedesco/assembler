@@ -10,7 +10,7 @@ struct Instruc {
 }; 
 
 struct DataBinaryLine {
-	char * line;//line[32];
+	char * line;
 };
 
 struct Label {
@@ -34,7 +34,7 @@ int labelCount(char * filename);
 int sizeOfDataBinary(char * filename);
 int isInstruc(char * line);
 void convertAsciiToBin(char ascii, char *output, int digits);
-void fillInstrucList(struct Instruc list[]);//struct Instruc *list);
+void fillInstrucList(struct Instruc list[]);
 void fillLabelList(char * filename, struct Label list[]);
 void fillDataLines(char * filename, struct DataBinaryLine data[]);
 int getLabelIndex(char * label, struct Label list[], int numLabels);
