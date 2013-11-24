@@ -10,13 +10,13 @@ struct Instruc {
 }; 
 
 struct DataBinaryLine {
-	char line[32];
+	char * line;//line[32];
 };
 
 struct Label {
 	char * label;
-	//1 if a text label, 0 if a data label
 	int location;
+	//1 if a text label, 0 if a data label
 	int TorD;
 };
 
@@ -37,9 +37,12 @@ void convertAsciiToBin(char ascii, char *output, int digits);
 void fillInstrucList(struct Instruc list[]);//struct Instruc *list);
 void fillLabelList(char * filename, struct Label list[]);
 void fillDataLines(char * filename, struct DataBinaryLine data[]);
-int getLabelIndex(char * label, struct Label list[]);
-char * getInstrucBinary(char * line, struct Label list[]);
-void binaryToFile(char * inFile, char * outFile, struct Label list[]);
+int getLabelIndex(char * label, struct Label list[], int numLabels);
+char * getInstrucBinary(char * line, struct Label list[], int numLabels);
+void instrucToFile(char * inFile, char * outFile, struct Label list[], int numLabels, struct DataBinaryLine data[], int numDataLines);
+void listToFile(char * outFile, struct Label list[], int numLabels, struct DataBinaryLine data[], int numDataLines, struct Instruc instrucs[], int numInstruc);
+void symbolsToFile(char * outFile, struct Label list[], int numLabels);
+char * reverseStr(char * str);
 int execInstruc(char * line, int current);
 int getRegNum(char* reg);
 char * intToBinChar(int num, int length);

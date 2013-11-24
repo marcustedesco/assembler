@@ -6,7 +6,7 @@
 
 #include "assembler.h"
 
-//#define debug
+#define debug
 //#define displayI
 
 void run(char * inputFile, char * outFile)
@@ -54,7 +54,9 @@ void run(char * inputFile, char * outFile)
 	struct DataBinaryLine dataLines[numDataLines];
 
 	for(j = 0; j < sizeof(dataLines)/sizeof(struct DataBinaryLine); j++){
+		dataLines[j].line = malloc(sizeof(char)*32);
 		strcpy(dataLines[j].line, "\0");
+		//dataLines[j].line[0] = '\0';
 		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
 	}
 
@@ -72,7 +74,7 @@ void run(char * inputFile, char * outFile)
 		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
 	}
 
-	binaryToFile(stripedFile, outFile, myLabels);
+	instrucToFile(stripedFile, outFile, myLabels, numLabels, dataLines, numDataLines);
     //do the same thing for labels
 	//int numLabels = labelCount(stripedFile);
 	//declare struct Label myLabels[numLabels];
@@ -187,6 +189,146 @@ void run(char * inputFile, char * outFile)
 	//tell their location if necessary
 }
 
+void run_symbol (char * inputFile, char * outFile){
+	#ifdef debug
+		printf("--In run_symbol--\n");
+		printf("	inputFile %s!\n", inputFile);
+		printf("	outFile %s!\n", outFile);
+	#endif
+
+	#ifdef debug
+		printFile(inputFile);
+	#endif
+
+	char * stripedFile = stripExtra(inputFile);
+	
+	#ifdef debug
+		printFile(stripedFile);
+	#endif
+
+	int numInstruc = instrucCountAndFile(stripedFile);
+
+	struct Instruc myInstruc[numInstruc];
+
+	int j;
+	for(j = 0; j < sizeof(myInstruc)/sizeof(struct Instruc); j++){
+		myInstruc[j].command = malloc(sizeof(char)*256);
+		myInstruc[j].command = "\0";	
+	}
+
+    fillInstrucList(myInstruc);
+
+    int numLabels = labelCount(stripedFile);
+    //int numDataLines = sizeOfDataBinary(stripedFile);
+
+    //printf("number of label 32 bit arrays to allocate: %d\n", numLabels);
+
+    struct Label myLabels[numLabels];
+
+	for(j = 0; j < sizeof(myLabels)/sizeof(struct Label); j++){
+		myLabels[j].label = malloc(sizeof(char)*128);
+		myLabels[j].label = "\0";	
+	}
+/*
+	struct DataBinaryLine dataLines[numDataLines];
+
+	for(j = 0; j < sizeof(dataLines)/sizeof(struct DataBinaryLine); j++){
+		dataLines[j].line = malloc(sizeof(char)*32);
+		strcpy(dataLines[j].line, "\0");
+		//dataLines[j].line[0] = '\0';
+		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
+	}
+*/
+	fillLabelList(stripedFile, myLabels);
+	//fillDataLines(stripedFile, dataLines);
+
+	int i;
+	for(i = 0; i < sizeof(myLabels)/sizeof(struct Label); i++){
+		printf("myLabels[%d] label: %s\n", i, myLabels[i].label);
+		printf("myLabels[%d] location: %d\n", i, myLabels[i].location);
+		printf("myLabels[%d] TorD: %d\n", i, myLabels[i].TorD);
+	}
+/*
+	for(j = 0; j < sizeof(dataLines)/sizeof(struct DataBinaryLine); j++){
+		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
+	}
+*/
+	//binaryToFile(stripedFile, outFile, myLabels, numLabels, dataLines, numDataLines);
+	symbolsToFile(outFile, myLabels, numLabels);
+}
+
+void run_list (char * inputFile, char * outFile){
+	#ifdef debug
+		printf("--In run_list--\n");
+		printf("	inputFile %s!\n", inputFile);
+		printf("	outFile %s!\n", outFile);
+	#endif
+
+	#ifdef debug
+		printFile(inputFile);
+	#endif
+
+	char * stripedFile = stripExtra(inputFile);
+	
+	#ifdef debug
+		printFile(stripedFile);
+	#endif
+
+	int numInstruc = instrucCountAndFile(stripedFile);
+
+	struct Instruc myInstruc[numInstruc];
+
+	int j;
+	for(j = 0; j < sizeof(myInstruc)/sizeof(struct Instruc); j++){
+		myInstruc[j].command = malloc(sizeof(char)*256);
+		myInstruc[j].command = "\0";	
+	}
+
+    fillInstrucList(myInstruc);
+
+    for(j = 0; j < sizeof(myInstruc)/sizeof(struct Instruc); j++){
+		printf("myInstruc[%d]: %s", j,  myInstruc[j].command);	
+	}
+
+    int numLabels = labelCount(stripedFile);
+    int numDataLines = sizeOfDataBinary(stripedFile);
+
+    //printf("number of label 32 bit arrays to allocate: %d\n", numLabels);
+
+    struct Label myLabels[numLabels];
+
+	for(j = 0; j < sizeof(myLabels)/sizeof(struct Label); j++){
+		myLabels[j].label = malloc(sizeof(char)*128);
+		myLabels[j].label = "\0";	
+	}
+
+	struct DataBinaryLine dataLines[numDataLines];
+
+	for(j = 0; j < sizeof(dataLines)/sizeof(struct DataBinaryLine); j++){
+		dataLines[j].line = malloc(sizeof(char)*32);
+		strcpy(dataLines[j].line, "\0");
+		//dataLines[j].line[0] = '\0';
+		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
+	}
+
+	fillLabelList(stripedFile, myLabels);
+	fillDataLines(stripedFile, dataLines);
+
+	int i;
+	for(i = 0; i < sizeof(myLabels)/sizeof(struct Label); i++){
+		printf("myLabels[%d] label: %s\n", i, myLabels[i].label);
+		printf("myLabels[%d] location: %d\n", i, myLabels[i].location);
+		printf("myLabels[%d] TorD: %d\n", i, myLabels[i].TorD);
+	}
+
+	for(j = 0; j < sizeof(dataLines)/sizeof(struct DataBinaryLine); j++){
+		printf("dataLine[%d]: %s\n", j, dataLines[j].line);	
+	}
+
+	listToFile(outFile, myLabels, numLabels, dataLines, numDataLines, myInstruc, numInstruc);
+
+}
+
 void convertAsciiToBin(char ascii, char *output, int digits) { 
 	int i, remainder; 
 	char digitsArray[17] = "01";
@@ -200,46 +342,14 @@ void convertAsciiToBin(char ascii, char *output, int digits) {
 	output[digits] = '\0'; 
 }
 
-void run_symbol (char * inputFile, char * outFile){
-	#ifdef debug
-		printf("--In run_symbol--\n");
-		printf("	inputFile %s!\n", inputFile);
-		printf("	outFile %s!\n", outFile);
-	#endif
-
-	FILE *fp;
-	fp = fopen(inputFile,"r");
-
-	if (fp == NULL) {
-  		fprintf(stderr, "Can't open input file %s!\n", inputFile);
-  		exit(1);
-	}
-
-	fclose(fp);
-
-}
-
-void run_list (char * inputFile, char * outFile){
-	#ifdef debug
-		printf("--In run_list--\n");
-		printf("	inputFile %s!\n", inputFile);
-		printf("	outFile %s!\n", outFile);
-	#endif
-
-	FILE *fp;
-	fp = fopen(inputFile,"r");
-
-	if (fp == NULL) {
-  		fprintf(stderr, "Can't open input file %s!\n", inputFile);
-  		exit(1);
-	}
-
-	fclose(fp);
-
-}
-
 /* returns intermediate filename */
 char * stripExtra(char * inputFile){
+	#ifdef debug
+		printf("--In stripExtra--\n");
+		printf("	inputFile %s!\n", inputFile);
+	#endif
+
+
 	FILE *ifp;
 	ifp = fopen(inputFile,"r");
 
@@ -264,12 +374,6 @@ char * stripExtra(char * inputFile){
 	while (!feof(ifp)) {
 	    fgets (line, 256, ifp);
 
-		  //debug
-		#ifdef debug
-			if (line!=NULL)
-		    	//printf("~LINE: %s", line);
-		#endif
-
 		char keys[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.";
 		int j = strcspn (line,keys);
 
@@ -293,7 +397,7 @@ char * stripExtra(char * inputFile){
 		  //printf("Clean line: %s\n",line);
 
 		  //add the pseudo instructions if blt or ble
-		  if(strstr(line,"blt") != NULL){
+		  if(strstr(line,"blt") != NULL  && strstr(line,"bltz") == NULL){
 		  		char key[] = "~\n";
 				char * one;
 				char * two;
@@ -325,7 +429,7 @@ char * stripExtra(char * inputFile){
 
 				fprintf(ofp, "%s\n", tempLine2);
 
-		  }else if(strstr(line,"ble") != NULL){
+		  }else if(strstr(line,"ble") != NULL && strstr(line,"blez") == NULL){
 		  		char key[] = "~\n";
 				char * one;
 				char * two;
@@ -372,6 +476,10 @@ char * stripExtra(char * inputFile){
 }
 
 char * cleanStr(char * line){
+	#ifdef debug
+		printf("--In cleanStr--\n");
+		printf("	line %s!\n", line);
+	#endif
 	//printf("*************going into clean String: \t%s\n", line);
 	line = removeComment(line);
 	//printf("LINE AFTER RETURNING FROM removeComment: %s\n",line);
@@ -440,7 +548,8 @@ int instrucCountAndFile(char * filename){
 	
 	while (!feof(ifp)) {
 	  if (fgets (line, 256, ifp)!=NULL){
-	    char * lineCopy = malloc(strlen(line)+1);
+	    char * lineCopy = malloc(strlen(line));
+	    strcat(lineCopy, "\0");
 	    strcpy(lineCopy, line);
 	  	if(strstr(line,".text") != NULL)
 	  		inText = 0;
@@ -599,10 +708,10 @@ int sizeOfDataBinary(char * filename){
 	return count;
 }
 
-void binaryToFile(char * inFile, char * outFile, struct Label * list){
+void instrucToFile(char * inFile, char * outFile, struct Label list[], int numLabels, struct DataBinaryLine data[], int numDataLines){
 	#ifdef debug
 		printf("--In binaryToFile--\n");
-		printf("	outputFile %s!\n", filename);
+		printf("	outputFile %s!\n", outFile);
 	#endif
 
 	FILE *ifp;
@@ -637,15 +746,126 @@ void binaryToFile(char * inFile, char * outFile, struct Label * list){
 	  		inText = 1;
 	  	}
 	    if(inText == 0 && isInstruc(line) == 0){
-			fprintf(ofp, "%s\n", getInstrucBinary(lineCopy, list));
+			fprintf(ofp, "%s\n", getInstrucBinary(lineCopy, list, numLabels));
 	    }
-	    if(inText == 1 && strstr(line,".data") == NULL){
-	    	fprintf(ofp, "%s\n", "data");
-	    }
+	    //if(inText == 1 && strstr(line,".data") == NULL){
+	    //	fprintf(ofp, "%s\n", "data");
+	    //}
 	  }
 	}
 
+	printf("-------------PRINTING THE DATA------------\n");
+	printf("size of data: %d\n", numDataLines);
+	int i;
+	for(i = 0; i < numDataLines/*/sizeof(struct DataBinaryLine)*/; i++){
+		fprintf(ofp, "%s\n", data[i].line);
+	}
+
 	fclose(ifp);
+	fclose(ofp);
+
+	return;
+}
+
+void listToFile(char * outFile, struct Label list[], int numLabels, struct DataBinaryLine data[], int numDataLines, struct Instruc instrucs[], int numInstruc){
+	#ifdef debug
+		printf("--In listToFile--\n");
+		printf("	outputFile %s!\n", outFile);
+	#endif
+
+	FILE *ofp;
+	
+	ofp = fopen(outFile, "w+");
+
+	if (ofp == NULL) {
+	  fprintf(stderr, "Can't open output file %s!\n", outFile);
+	  exit(1);
+	}
+	
+	int i;
+	for(i = 0; i < numInstruc; i++){
+		int j;
+		for(j = 0; j < numLabels; j++){
+			if(list[j].location == i && list[j].TorD == 1){
+				fprintf(ofp, "\t\t\t\t\t\t\t\t\t\t\t\t%s:\n", list[j].label);
+			}
+		}
+
+		char hex[8];
+		sprintf(hex,"%X", (i*4));
+
+		fprintf(ofp, "%s", "0x");
+		int k;
+		for(k = 0; k < 8-strlen(hex); k++)
+			fprintf(ofp, "%c", '0');
+		fprintf(ofp, "%s\t", hex);
+		fprintf(ofp, "%s\t", getInstrucBinary(strdup(instrucs[i].command), list, numLabels));
+		fprintf(ofp, "%s", instrucs[i].command);
+
+	}
+
+	fprintf(ofp, "\n");	
+
+	for(i = 0; i < numDataLines; i++){
+		int j;
+		for(j = 0; j < numLabels; j++){
+			if(list[j].location == i && list[j].TorD == 0){
+				fprintf(ofp, "%s:\n", list[j].label);
+			}
+		}
+
+		char hex[8];
+		sprintf(hex,"%X", ((i*4)+8192));
+
+		fprintf(ofp, "%s", "0x");
+		int k;
+		for(k = 0; k < 8-strlen(hex); k++)
+			fprintf(ofp, "%c", '0');
+		fprintf(ofp, "%s\t", hex);
+
+		fprintf(ofp, "%s\n", data[i].line);
+	}
+
+	fclose(ofp);
+
+	return;
+}
+
+void symbolsToFile(char * outFile, struct Label list[], int numLabels){
+	#ifdef debug
+		printf("--In symbolsToFile--\n");
+		printf("	outputFile %s!\n", outFile);
+	#endif
+
+
+	FILE *ofp;
+	
+	ofp = fopen(outFile, "w+");
+
+	if (ofp == NULL) {
+	  fprintf(stderr, "Can't open output file %s!\n", outFile);
+	  exit(1);
+	}
+
+	fprintf(ofp, "%s\t\t%s\n", "Address", "Symbol");
+	fprintf(ofp, "%s\n", "---------------------------");
+
+	int i;
+	for(i = 0; i < numLabels; i++){
+
+		int location = getLabelIndex(list[i].label, list, numLabels);
+		char hex[8];
+		sprintf(hex,"%X", location);
+		//printf("Hex array %d is: %s\n", location, hex);
+		//printf("size of hex array is: %d\n", strlen(hex));
+
+		fprintf(ofp, "%s", "0x");
+		int j;
+		for(j = 0; j < 8-strlen(hex); j++)
+			fprintf(ofp, "%c", '0');
+		fprintf(ofp, "%s\t%s\n", hex, list[i].label);
+	}
+
 	fclose(ofp);
 
 	return;
@@ -779,6 +999,7 @@ void fillInstrucList(struct Instruc list[]){
 	  if (fgets (line, 256, ifp)!=NULL){
 	  	if(strcmp(line,"\n") != 0){
 			list[index].command = strdup(line);	
+			strcat(list[index].command, "\0");
 	    	index++;
 	    }
 	  }
@@ -912,152 +1133,124 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 	  	if(strstr(line,".data") != NULL)
 	  		inText = 1;
 	    if(inText == 1 && strstr(line,".data") == NULL){
-	    	
+	    	//use the reverse loop from int to binary and reverse the string in groups of 4 chars, add " "
 	    	if(strstr(lineCopy, ".asciiz") != NULL){
 	    		printf("LineCopy inside of ascii: %s\n", lineCopy);
 	    		char * quote = malloc(sizeof(char)*256);
+	    		char * reverseQuote = malloc(sizeof(char)*256);
+	    		strcpy(reverseQuote,"\0");
 	    		quote = strtok(lineCopy,"\"");
 	    		quote = strtok(NULL, "\"");
+	    		strcat(quote,"\0");
 	    		printf("quote inside of ascii: %s\n", quote);
+	    		printf("reverseQuote before reverse:\t%s\n", reverseQuote);
+	    		//strcat(reverseQuote,"~\0");
+
+	    		int k;
+	    		int count = 0;
+	    		char tempo[4];
+	    		for(k = 0; k < strlen(quote); k++){
+		    		if(count == 0){//(k+1)%4 == 0){
+			    		
+			    		tempo[0] = '\0';
+			    		printf("tempo before cpy:\t%s\n", tempo);
+			    		//fix this
+			    		if(k+4 >= strlen(quote))
+			    			strncpy(tempo,quote+k,strlen(quote)-(k));
+			    		else
+			    			strncpy(tempo,quote+k,4);
+			    		tempo[4] = '\0';
+			    		printf("tempo after cpy:\t%s\n", tempo);
+			    		char tempo2[4];
+			    		tempo2[0] = '\0';
+			    		strcpy(tempo2,reverseStr(tempo));
+			    		printf("tempo2 after cpy:\t%s\n", tempo2);
+			    		strcat(reverseQuote,tempo2);
+		    		}
+		    		count++;
+		    		if(count > 3)
+		    			count = 0;
+		    	}
+		    	//if(count == )
+	    		
+	    		//strcat(reverseQuote,"~\0");
+	    		printf("reverseQuote after reverse:\t%s\n", reverseQuote);
+
+
 
 	    		int z;
 	    		char * temp = malloc(sizeof(char)*32);
 	    		//temp[0] ='\0';
 	    		strcpy(temp,"\0");
-	    		for(z = 0; z < strlen(quote); z++){
-	    			byte[0] = '\0';
-	    			printf("quote[%d]: %c\n", z, quote[z]);
-	    			printf("temp before:\t%s\n", temp);
-	    			printf("byte before:\t%s\n", byte);
-	    			convertAsciiToBin(quote[z], byte, 8);
-	    			printf("byte after:\t%s\n", byte);
-	    			strcat(temp,byte);
-	    			printf("temp after:\t%s\n", temp);
-
-
+	    		for(z = 0; z < strlen(reverseQuote); z++){
+	    			
+	    			
 	    			if(byteCount > 3){
 	    				byteCount = 0;
-	    				strcpy(&data[lineIndex].line[0], strdup(temp));
+	    				strcpy(data[lineIndex].line, strdup(temp));
+	    				//strcpy(&data[lineIndex].line[0], strdup(temp));
 	    				//strcat(data[lineIndex].line, "\0");
-	    				data[lineIndex].line[31] = '\0';
+	    				//strcat(data[lineIndex].line, "\0");
+	    				//data[lineIndex].line[31] = '\0';
+	    				strcat(data[lineIndex].line,"\0");
 	    				strcpy(temp,"\0");
 	    				lineIndex++;
 	    			}
 
-	    			byteCount++;
-	    		}
-	    	}
+	    			printf("reverseQuote[%d]: %c\n", z, reverseQuote[z]);
+	    			printf("temp before:\t%s\n", temp);
+	    			printf("byte before:\t%s\n", byte);
+	    			int ascii = reverseQuote[z];
+	    			if(reverseQuote[z] != '\0' && reverseQuote[z] != '\n' && reverseQuote[z] != '\t' && ascii != 5){
+	    				printf("reverseQuote[%d] inside IF STATEMENT: %c\n", z, reverseQuote[z]);
+	    				printf("reverseQuote[%d] inside IF (ascii)  : %d\n", z, reverseQuote[z]);
+		    			if(reverseQuote[z] != '~')
+		    				convertAsciiToBin(reverseQuote[z], byte, 8);
+		    			else
+		    				convertAsciiToBin(' ', byte, 8);
+		    			printf("byte after:\t%s\n", byte);
+		    			strcat(temp,strdup(byte));
+		    			printf("temp after:\t%s\n", temp);
+		    			byte[0] = '\0';
 
-
-/*
-   		 	if(strstr(lineCopy2, ".asciiz") != NULL){
-	    		char * str;
-	    		str = strtok(lineCopy2,"\"");
-	    		str = strtok(NULL, "\"");
-
-	    		printf("This should be the whole ascii string: %s\n", str);
-
-	    		char temp[32];
-	    		strcpy(temp, "TESTTTTTTTT");
-
-	    		int z;
-	    		for(z = 0; z < strlen(str) ; z++){
-	    			printf("-------------Going into loop-------------\n");
-	    			printf("data[%d].line: %s\n", lineIndex, data[lineIndex].line);
-	    			printf("temp on %d: %s\n", lineIndex, temp);
-	    			strcpy(byte,"\0");
-	    			printf("byte before: %s\n", byte);
-	    			printf("Current character: %c\n", str[z]);
-
-	    			printf("temp on %d BEFORE if: %s\n", lineIndex, temp);
-	    			if(byteCount > 3){
-	    				byteCount = 0;
-	    				printf("++++++temp to set the line on %d: %s\n", lineIndex, temp);
-	    				strcpy(data[lineIndex].line, strdup(temp));
-	    				strcat(data[lineIndex].line, "\0");
-	    				printf("after the set data[%d].line: %s\n", lineIndex, data[lineIndex].line);
-	    				lineIndex++;
-	    				temp[0] = '\0';
+	    				byteCount++;
 	    			}
-	    			//change this so it reverses
-	    			//strcat(data[lineIndex].line, byte);
-	    			convertAsciiToBin(str[z], byte, 8);
-	    			printf("byte after: %s\n", byte);
-	    			strcat(temp, strdup(byte));
-	    			byteCount++;
 	    		}
-	    	}*/
-	    /*
-	    	if(strstr(lineCopy2, ".asciiz") != NULL){
+	    	}else if(strstr(lineCopy, ".word") != NULL){
 	    		char * str;
-	    		str = strtok(lineCopy2,"\"");
-	    		str = strtok(NULL, "\"");
-
-	    		printf("This should be the whole ascii string: %s\n", str);
-	    		//need to replace all the '~' with ' '
-	    		int z;
-	    		for(z = 0; z < strlen(str) ; z++){
-	    			printf("---------Beginning loop------------------\n");
-	    			strcpy(byte, "\0");
-	    			printf("z: %d\n", z);
-	    			printf("index: %d\n", index);
-	    			printf("count: %d\n", count);
-	    			printf("byte: %s\n", byte);
-	    			printf("^^^^^^^^^^^^^^^^^^^^\n");
-					if(count >=4){
-						//might add '\0' to this
-						//fprintf(ofp, "%s\n", data[index].line);
-						index++;
-						count = 0;
-					}
-					printf("character: %c\n",str[z]);
-					convertAsciiToBin(str[z], byte, 8);
-					char * temp = strcat(byte,data[index].line);
-					printf("byte after strcat: %s\n",byte);
-					strcpy(data[index].line,temp);
-					printf("line[%d]: %s\n", index, data[index].line);
-					count++;
-
-					printf("-----------Ending loop------------\n");
-				}
-
-				printf("line outside: %s\n",data[index].line);
-				//char * temp2 = malloc(sizeof(char)*32);
-				char temp2[32];
-				temp2[0] = '\0';
-				printf("temp2: %s\n",temp2);
-
-				if(strlen(data[index].line) < 32)
-				{
-					int n = 32 - strlen(data[index].line);
-					int i;
-					for(i = 0; i < n; i++){
-						strcat(temp2,"0");
-						printf("temp2: %s\n",temp2);
-					}
-					strcat(temp2,data[index].line);
-					strcpy(data[index].line,temp2);
-					index++;
-				}
-	    	}
-	    	*/
-	    	else if(strstr(lineCopy, ".word") != NULL){
-	    		/*char * str;
-	    		str = strtok(lineCopy2,"~\n");
+	    		str = strtok(lineCopy,"~\n");
 	    		str = strtok(NULL, "~\n");
 	    		str = strtok(NULL, "~\n");
-	    		//printf("(word) token string is: %s\n", str);
+	    		printf("(word) token string is: %s\n", str);
 	    		if(strchr(str,':') != NULL){
 	    			char * number;
 	    			number = strtok(str,":\n");
+	    			int intial = atoi(number);
 	    			number = strtok(NULL,":\n");
-	    			//printf("(word) token number is: %s\n", str);
-	    			//printf("number to add is: %d\n", atoi(number));
-	    			dataCount+= atoi(number);
+					int size = atoi(number);
+
+					int i;
+					for(i = 0; i < size; i++){
+						strcpy(data[i+lineIndex].line, strdup(intToBinChar(atoi(str),32)));
+						strcat(data[i+lineIndex].line, "\0");
+						//memcpy(data[i+lineIndex].line, intToBinChar(atoi(str),32), strlen(intToBinChar(atoi(str),32)));
+						//strcpy(&data[i+lineIndex].line[0], strdup(intToBinChar(intial,32)));
+						//strcat(data[i+lineIndex].line, "\0");
+						//data[lineIndex].line[31] = '\0';
+					}
+					lineIndex+=size;
+
+	    		}else if(strchr(str,':') != NULL){
+	    			//do the stuff for commas
 	    		}else{
-	    			dataCount++;
-	    			//printf("count increased by 1\n");
-	    		}*/
+	    			strcpy(data[lineIndex].line, strdup(intToBinChar(atoi(str),32)));
+					strcat(data[lineIndex].line, "\0");
+	    			//memcpy(data[lineIndex].line, intToBinChar(atoi(str),32), strlen(intToBinChar(atoi(str),32)));
+	    			//strcpy(&data[lineIndex].line[0], strdup(intToBinChar(atoi(str),32)));
+					//strcat(data[lineIndex].line, "\0");
+					//data[lineIndex].line[31] = '\0';
+					lineIndex++;	    			
+	    		}
 	    	}
 	    }
 	  }
@@ -1066,7 +1259,7 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 	fclose(ifp);
 	printf("#################################################CLOSED IN FILL DATA\n");
 	printf("data[0]%s\n", data[0].line);
-	printf("Size of data: %d\n", sizeof(data)/sizeof(data[0]));
+	printf("Size of data: %d\n", sizeof(data)/sizeof(struct DataBinaryLine));
 	int j;
 	for(j = 0; j < sizeof(data)/sizeof(struct DataBinaryLine); j++){
 		printf("in Fill dataLine[%d]: %s\n", j, data[j].line);	
@@ -1075,10 +1268,23 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 	return;
 }
 
-char * getInstrucBinary(char * line, struct Label list[]){
+char * reverseStr(char * str){
+	char temp[strlen(str)];
+	int i;
+	for(i = 0; i < strlen(str); i++){
+		temp[i] = str[strlen(str)-1-i];
+	}
+
+	//temp[i+1] = '\0';
+
+	return strdup(temp);
+}
+
+char * getInstrucBinary(char * line, struct Label list[], int numLabels){
 	#ifdef debug
-		//printf("--In getInstrucBinary--\n");
-		//printf("	instruc to convert to binary: %s!\n", line);
+	printf("-----------------------------------------------\n");
+		printf("--In getInstrucBinary--\n");
+		printf("	instruc to convert to binary: %s!\n", line);
 	#endif
 
 	//changed to 40 from 32 to supported adding instruction at end
@@ -1140,7 +1346,7 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		strcat(binary,intToBinChar(getRegNum("$zero"),5));
 		//rd
 		strcat(binary,intToBinChar(getRegNum(two),5));
-		strcat(binary, intToBinChar(getLabelIndex(three, list),16));
+		strcat(binary, intToBinChar(getLabelIndex(three, list, numLabels),16));
 		#ifdef displayI
 			strcat(binary,"\tla");
 		#endif
@@ -1340,7 +1546,7 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		//rt
 		strcat(binary,intToBinChar(getRegNum(three),5));
-		strcat(binary, intToBinChar(getLabelIndex(four, list),16));
+		strcat(binary, intToBinChar(getLabelIndex(four, list, numLabels),16));
 		#ifdef displayI
 			strcat(binary,"\tbeq");
 		#endif
@@ -1352,7 +1558,7 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		//rt
 		strcat(binary,intToBinChar(getRegNum(three),5));
 		//this is wrong. must be shifted
-		strcat(binary, intToBinChar(getLabelIndex(four, list),16));
+		strcat(binary, intToBinChar(getLabelIndex(four, list, numLabels),16));
 		#ifdef displayI
 			strcat(binary,"\tbne");
 		#endif
@@ -1362,7 +1568,7 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		//rs
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		strcat(binary,"00000");
-		strcat(binary, intToBinChar(getLabelIndex(three, list),16));
+		strcat(binary, intToBinChar(getLabelIndex(three, list, numLabels),16));
 		#ifdef displayI
 			strcat(binary,"\tbltz");
 		#endif
@@ -1372,7 +1578,7 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		//rs
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		strcat(binary,"00000");
-		strcat(binary, intToBinChar(getLabelIndex(three, list),16));
+		strcat(binary, intToBinChar(getLabelIndex(three, list, numLabels),16));
 		#ifdef displayI
 			strcat(binary,"\tblez");
 		#endif
@@ -1393,7 +1599,9 @@ char * getInstrucBinary(char * line, struct Label list[]){
 	}
 	else if(strcmp(one,"j") == 0){
 		strcpy(binary,"000010");
-		strcat(binary,"instr_indexxxxxx");
+		//Calulate the instruction index
+		//strcat(binary,"instr_indexxxxxx");
+		strcat(binary,"00000000000000000000000000");
 		#ifdef displayI
 			strcat(binary,"\tj");
 		#endif
@@ -1403,7 +1611,9 @@ char * getInstrucBinary(char * line, struct Label list[]){
 		//rs
 		strcat(binary,intToBinChar(getRegNum(two),5));
 		strcat(binary,"0000000000");
-		strcat(binary,"hintx");
+		//I dont know what hint is actually supposed to be so I will fill in with 0's
+		//strcat(binary,"hintx");
+		strcat(binary,"00000");
 		strcat(binary,"001000");
 		#ifdef displayI
 			strcat(binary,"\tjr");
@@ -1411,7 +1621,9 @@ char * getInstrucBinary(char * line, struct Label list[]){
 	}
 	else if(strcmp(one,"jal") == 0){
 		strcpy(binary,"000011");
-		strcat(binary,"instr_indexxxxxx");
+		//Calulate the instruction index
+		//strcat(binary,"instr_indexxxxxx");
+		strcat(binary,"00000000000000000000000000");
 		#ifdef displayI
 			strcat(binary,"\tjal");
 		#endif
@@ -1427,16 +1639,15 @@ char * getInstrucBinary(char * line, struct Label list[]){
 	}
 
 	strcat(binary,"\0");
-
-	char * bin = &binary[0];
-	return strdup(bin);
+	return strdup(binary);
 }
 
-int getLabelIndex(char * label, struct Label list[]){
+int getLabelIndex(char * label, struct Label list[], int numLabels){
 	//printf("------input into getLabelIndex: %s\n", label);
 	//printf("size of label list: %d\n", sizeof(list));
 	int i;
-	for(i = 0; i < sizeof(list)+1; i++){
+	//this is not how you get the size of the list
+	for(i = 0; i < numLabels; i++){
 		//printf("current label to compare: %s\n", list[i].label);
 		if(strcmp(label, list[i].label) == 0){
 			if(list[i].TorD == 0){
@@ -1445,7 +1656,7 @@ int getLabelIndex(char * label, struct Label list[]){
 			}
 			else{
 				//printf("FOUND label  @ %d: %s\n", (list[i].location),list[i].label);
-				return list[i].location;
+				return (list[i].location*4);
 			}
 		}
 	}
@@ -1631,6 +1842,10 @@ int getRegNum(char* reg){
 		printf("	Register label to get reg number: %s!\n", reg);
 	#endif
 
+	//should never send getRegNum a NULL value
+	if(reg == NULL)
+		return -1;
+
 	if(strcmp(reg,"$zero") == 0)
 		return 0;
 	else if(strcmp(reg,"$at") == 0)
@@ -1701,17 +1916,12 @@ int getRegNum(char* reg){
 
 char * intToBinChar(int num, int length){
 
-	//for now, until labels are implemented
-	if(num == -1)
-		return "label";
-
 	char binary[length];
 
 	int total = num;
 	int i = 0;
 
 	while(total  > 0){
-		//printf("total: %d\n", total);
 		if(i < length){
 			int rem = total % 2;
 
@@ -1726,8 +1936,6 @@ char * intToBinChar(int num, int length){
 			break;
 	}
 
-	//printf("i: %d\t length: %d\n", i, length);
-
 	int j;
 	for(j = i; j < length; j++){
 		binary[j] = '0';
@@ -1735,29 +1943,6 @@ char * intToBinChar(int num, int length){
 
 	binary[j] = '\0';
 
-//	printf("j: %d\t length: %d\n", j, length);
-
-	//printf("binary before return: %s\n", binary);
-/*
-	int total = 0, index;
-	char binaryNumber[length];
-
-	for(index = length-1; index >= 0; index--){
-		if(num > 0){
-			total = num % 2;
-			num = num / 2;
-			if(total == 0)
-				binaryNumber[index] = '0';
-			else if(total == 1)
-				binaryNumber[index] = '1';
-		}
-		else
-			binaryNumber[index] = '0';
-	}
-
-	//binaryNumber[index] = '\0';
-	binaryNumber[length] = '\0';
-*/
 	//reverse the array
 	char binaryNumber[length];
 	for(i = 0; i < length; i++){
@@ -1766,8 +1951,6 @@ char * intToBinChar(int num, int length){
 
 	binaryNumber[i] = '\0';
 
-    //char* bin = &binary[0];
-    //return bin;*/
     return strdup(binaryNumber);
 }	
 
