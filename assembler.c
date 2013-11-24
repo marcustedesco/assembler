@@ -1152,7 +1152,8 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 	    		for(k = 0; k < strlen(quote); k++){
 		    		if(count == 0){//(k+1)%4 == 0){
 			    		
-			    		tempo[0] = '\0';
+			    		//tempo[0] = '\0';
+			    		strcpy(tempo, "\0");
 			    		printf("tempo before cpy:\t%s\n", tempo);
 			    		//fix this
 			    		if(k+4 >= strlen(quote))
@@ -1160,9 +1161,11 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 			    		else
 			    			strncpy(tempo,quote+k,4);
 			    		tempo[4] = '\0';
+			    		//strcat(tempo,"\0");
 			    		printf("tempo after cpy:\t%s\n", tempo);
 			    		char tempo2[4];
-			    		tempo2[0] = '\0';
+			    		//tempo2[0] = '\0';
+			    		strcpy(tempo2, "\0");
 			    		strcpy(tempo2,reverseStr(tempo));
 			    		printf("tempo2 after cpy:\t%s\n", tempo2);
 			    		strcat(reverseQuote,tempo2);
@@ -1276,6 +1279,7 @@ char * reverseStr(char * str){
 	}
 
 	//temp[i+1] = '\0';
+	strcat(temp,"\0");
 
 	return strdup(temp);
 }
