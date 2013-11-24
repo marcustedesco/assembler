@@ -1148,7 +1148,7 @@ void fillDataLines(char * filename, struct DataBinaryLine data[]) {
 
 	    		int k;
 	    		int count = 0;
-	    		char tempo[4];
+	    		char tempo[5];
 	    		for(k = 0; k < strlen(quote); k++){
 		    		if(count == 0){//(k+1)%4 == 0){
 			    		
